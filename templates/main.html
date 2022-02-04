@@ -5,8 +5,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Simple Graph</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    
+    <div class="wrapper">
+        <div class="controllers">
+            <div class="controllers-card">
+                <h1>Controllers</h1>
+                <div class="btn" id="get-graph-btn">New Graph</div>
+                <div class="btn hidden" id="add-node-btn">Add Node</div>
+            </div>
+        </div>
+        <div class="graph-container">
+            <div id="my-network"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='vis.js') }}"></script>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>
 </html>

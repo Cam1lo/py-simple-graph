@@ -1,5 +1,6 @@
 import json
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
@@ -34,7 +35,7 @@ def addNode():
         {
             "id": newNodeId,
             "value": 0,
-            "label": newNodeId
+            "label": f"{newNodeId}"
         }
     )
 
@@ -47,15 +48,12 @@ def addNode():
         }
     )
 
-    print(nodes)
-
     return get()
 
 @app.route("/removeNode")
 def removeNode():
     nodeId = request.args.get('node')
     # TODO: Given a node, remove it.
-
     return get()
 
 @app.route("/connectNodes")
@@ -82,7 +80,7 @@ def removeEdge():
 
     return get()
 
-@app.route("updateEdge")
+@app.route("/updateEdge")
 def updateEdge():
     edgeId = request.args.get('edgeId')
     edgeValue = request.args.get('edgeValue')
@@ -93,4 +91,4 @@ def updateEdge():
     return get()
 
 if __name__ == "__main__":
-    app.run()
+    app.run(ssl_context='adhoc')
