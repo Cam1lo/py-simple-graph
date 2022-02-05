@@ -6,7 +6,7 @@ app = Flask(__name__)
 nodes = [
     {
         "id": 0,
-        "value": 0,
+        #"value": 0,
         "label": "Main Node"
     }
 ]
@@ -26,29 +26,45 @@ def get():
 
 @app.route("/addNode")
 def addNode():
-    nodeId = request.args.get('node')
-    print(nodeId)
+    nodeLabel = request.args.get('label')
+    direction=request.args.get('direction')
+    connectedNode=request.args.get('connectedTo')
+    edgeValue=request.args.get('edgeValue')
     newNodeId = len(nodes)
     newEdgeId = len(edges)
+
 
     nodes.append(
         {
             "id": newNodeId,
-            "value": 0,
-            "label": newNodeId
+            "label": nodeLabel
         }
     )
 
-    edges.append(
-        {
-            "id": newEdgeId,
-            "value": 0,
-            "from": nodeId,
-            "to": newNodeId
-        }
-    )
 
-    print(nodes)
+
+    if 'from' in direction:
+
+        edges.append(
+            {
+                "id": newEdgeId,
+                "value": edgeValue,
+                "from": connectedNode,
+                "to": newNodeId
+            }
+        )
+    else:
+        edges.append(
+              {
+                    "id": newEdgeId,
+                    "value": edgeValue,
+                    "from": newNodeId,
+                    "to": connectedNode
+              }
+            )
+
+
+
 
     return get()
 
@@ -87,7 +103,6 @@ def connectNodes():
 @app.route("/updateNode")
 def updateNode():
     nodeId = request.args.get('nodeId')
-    nodeValue = request.args.get('nodeValue')
     nodeLabel = request.args.get('nodeLabel')
     # TODO: Given a nodeId, update the node with new value and label.
 
@@ -95,7 +110,7 @@ def updateNode():
         currentNodeId = i['id']
 
         if int(nodeId)==int(currentNodeId):
-            i.update(value=nodeValue,label=nodeLabel)
+            i.update(label=nodeLabel)
             break
 
     return get()
@@ -129,6 +144,66 @@ def updateEdge():
             i.update({"from": edgeFrom},to=edgeTo, value=edgeValue)
             break
     return get()
+
+
+@app.route("/inDepth")
+def inDepth():
+    sourceNode=request.args.get('sourceNodeId')
+    visited=[]
+    stack=[]
+
+
+    stack.append(sourceNode)
+
+    while stack:
+        actual=stack.pop()
+
+        if actual not in visited:
+            visited.append(int(actual))
+
+        for i in range(len(edges)):
+            if int (edges[i]['from'])==int(actual):
+                if edges[i]['to'] not in visited:
+                    stack.append(int(edges[i]['to']))
+
+    return json.dumps({
+        "inDepthNodes": visited
+
+    })
+
+
+@app.route("/searchWide")
+def searchWide():
+    sourceNode=request.args.get('sourceNodeId')
+    visited=[]
+    queue=[]
+
+
+    queue.append(sourceNode)
+
+    while queue:
+        actual=queue.pop(0)
+
+        if actual not in visited:
+            visited.append(int(actual))
+
+        for i in range(len(edges)):
+            if int (edges[i]['from'])==int(actual):
+                if edges[i]['to'] not in visited:
+                    queue.append(int(edges[i]['to']))
+
+    return json.dumps({
+        "wideNodes": visited
+
+    })
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     app.run()
