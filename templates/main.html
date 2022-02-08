@@ -13,7 +13,34 @@
             <div class="controllers-card">
                 <h1>Controllers</h1>
                 <div class="btn" id="get-graph-btn">New Graph</div>
-                <div class="btn hidden" id="add-node-btn">Add Node</div>
+                <div class="btn hidden" id="add-node-btn">
+                    <span class="add-node-btn-msg">Add Node</span>
+                    <form class="add-node-form hidden">
+                        <label>Label</label>
+                        <input type="text" id="add-node-input-label" required>
+                        <div>
+                            <select id="add-node-direction">
+                                <option value="from">from</option>
+                                <option value="to">to</option>
+                            </select>
+                            <select id="add-node-connected-to">
+                            </select>
+                        </div>
+                        <label class="node-weight">Weight</label>
+                        <input id="add-node-weight" min="0" type="number" required>
+                        <input value="Confirm" class="submit confirm-btn" type="submit">
+                    </form>
+                </div>
+                <div class="btn hidden" id="edit-node-btn">
+                    <span class="edit-node-btn-msg">Edit Node</span>
+                    <form class="edit-node-form hidden">
+                        <label>Label</label>
+                        <input type="text" id="edit-node-input-label" required>
+                        <label class="node-weight">Weight</label>
+                        <input id="edit-node-weight" min="0" type="number" required>
+                        <input value="Confirm" class="submit confirm-btn" type="submit">
+                    </form>
+                </div>
             </div>
         </div>
         <div class="graph-container">
