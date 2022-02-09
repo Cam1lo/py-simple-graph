@@ -213,16 +213,16 @@ def searchWide():
 @app.route("/exportGraph")
 def exportGraph():
 
-        location = request.args.get('location')
         graphName = request.args.get('graphName')
+        location = "static/"+graphName
 
-        file = open(location + graphName + ".txt", "w")
+        file = open(location + ".txt", "w")
         jsonToExport=get()
 
         file.write(str(jsonToExport))
         file.close()
 
-        return get()
+        return location
 
 
 @app.route("/importGraph")
