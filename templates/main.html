@@ -1,53 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Python Simple Graph</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
     <div class="wrapper">
-        <div class="controllers">
-            <div class="controllers-card">
-                <h1>Controllers</h1>
-                <div class="btn" id="get-graph-btn">New Graph</div>
-                <div class="btn hidden" id="add-node-btn">
-                    <span class="add-node-btn-msg">Add Node</span>
-                    <form class="add-node-form hidden">
-                        <label>Label</label>
-                        <input type="text" id="add-node-input-label" required>
-                        <div>
-                            <select id="add-node-direction">
-                                <option value="from">from</option>
-                                <option value="to">to</option>
-                            </select>
-                            <select id="add-node-connected-to">
-                            </select>
-                        </div>
-                        <label class="node-weight">Weight</label>
-                        <input id="add-node-weight" min="0" type="number" required>
-                        <input value="Confirm" class="submit confirm-btn" type="submit">
-                    </form>
-                </div>
-                <div class="btn hidden" id="edit-node-btn">
-                    <span class="edit-node-btn-msg">Edit Node</span>
-                    <form class="edit-node-form hidden">
-                        <label>Label</label>
-                        <input type="text" id="edit-node-input-label" required>
-                        <label class="node-weight">Weight</label>
-                        <input id="edit-node-weight" min="0" type="number" required>
-                        <input value="Confirm" class="submit confirm-btn" type="submit">
-                    </form>
-                </div>
-            </div>
+      <div class="controllers">
+        <div class="controllers-card">
+          <h1>Controllers</h1>
+          <div class="btn" id="get-graph-btn">New Graph</div>
+          <div class="btn hidden" id="add-node-btn">
+            <span class="add-node-btn-msg">Add Node</span>
+            <form class="add-node-form hidden">
+              <label>Label</label>
+              <input type="text" id="add-node-input-label" required />
+              <div>
+                <select id="add-node-direction">
+                  <option value="from">from</option>
+                  <option value="to">to</option>
+                </select>
+                <select id="add-node-connected-to"></select>
+              </div>
+              <label class="edge-weight">Edge Weight</label>
+              <input id="add-node-edge-weight" min="0" type="number" required />
+              <input value="Confirm" class="submit confirm-btn" type="submit" />
+            </form>
+          </div>
+          <div class="btn hidden" id="add-edge-btn">
+            <span class="add-edge-btn-msg">Add Edge</span>
+            <form class="add-edge-form hidden">
+              <div>
+                <label for="add-edge-from"></label>
+                <select id="add-edge-from"></select>
+              </div>
+              <div>
+                <label for="add-edge-to"></label>
+                <select id="add-edge-to"></select>
+              </div>
+              <label class="edge-weight">Weight</label>
+              <input id="add-edge-weight" min="0" type="number" required />
+              <input value="Confirm" class="submit confirm-btn" type="submit" />
+            </form>
+          </div>
+          <div class="btn hidden" id="edit-node-btn">
+            <span class="edit-node-btn-msg">Edit Node</span>
+            <form class="edit-node-form hidden">
+              <div class="form-group">
+                <label>Label</label>
+                <input type="text" id="edit-node-input-label" required />
+              </div>
+              <input value="Confirm" class="submit confirm-btn" type="submit" />
+            </form>
+          </div>
+          <div class="btn hidden" id="edit-edge-btn">
+            <span class="edit-edge-btn-msg">Edit Edge</span>
+            <form class="edit-edge-form hidden">
+              <div>
+                <label for="edit-edge-from">from</label>
+                <select id="edit-edge-from"></select>
+              </div>
+              <div>
+                <label for="edit-edge-to">to</label>
+                <select id="edit-edge-to"></select>
+              </div>
+              <label class="edge-weight">Weight</label>
+              <input id="edit-edge-weight" min="0" type="number" required />
+              <input value="Confirm" class="submit confirm-btn" type="submit" />
+            </form>
+          </div>
+          <div class="btn hidden" id="remove-node-btn">Remove Node</div>
+          <div class="btn hidden" id="remove-edge-btn">Remove Edge</div>
         </div>
-        <div class="graph-container">
-            <div id="my-network"></div>
-        </div>
+      </div>
+      <div class="graph-container">
+        <div id="my-network"></div>
+      </div>
     </div>
     <script src="{{ url_for('static', filename='vis.js') }}"></script>
     <script src="{{ url_for('static', filename='index.js') }}"></script>
-</body>
+  </body>
 </html>

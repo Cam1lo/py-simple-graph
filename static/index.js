@@ -1,30 +1,35 @@
 function _(selector) {
   return document.querySelector(selector);
 }
-
-const container = document.getElementById('my-network');
-const options   = {
+const url = "http://127.0.0.1:5000";
+const container = document.getElementById("my-network");
+const options = {
+  interaction: {
+    selectConnectedEdges: false,
+  },
   nodes: {
-    shape: 'dot',
-    color: 'rgb(44, 44, 44)'
+    shape: "dot",
+    color: "rgb(44, 44, 44)",
   },
   edges: {
     scaling: {
       min: 1,
-      max: 5
+      max: 5,
     },
-    arrows : {
+    arrows: {
       to: {
-        enabled    : true,
-        type       : 'arrow',
-        scaleFactor: .5
-      }
-    }
-  }
+        enabled: true,
+        type: "arrow",
+        scaleFactor: 0.5,
+      },
+    },
+  },
 };
-let nodes       = [];
-let edges       = [];
+let nodes = [];
+let edges = [];
 let network;
+let selectedNode;
+let selectedEdge;
 
 function createNetworkData(data) {
   nodes = data.nodes;
@@ -32,85 +37,246 @@ function createNetworkData(data) {
 
   return {
     nodes: new vis.DataSet(nodes),
-    edges: new vis.DataSet(edges)
+    edges: new vis.DataSet(edges),
   };
 }
 
 function createNetwork(data) {
   network = new vis.Network(container, createNetworkData(data), options);
-  network.on('selectNode', selectedNodeListener)
-  network.on('deselectNode', () => {
-    _('#edit-node-btn').classList.add('hidden');
-    resetEditForm();
-    resetAddForm();
-  })
+  network.on("selectNode", selectedNodeListener);
+  network.on("deselectNode", deselectedState);
+  network.on("selectEdge", selectedEdgeListener);
+  network.on("deselectEdge", deselectedState);
 }
 
-_('#get-graph-btn').addEventListener('click', () => {
-  window.fetch('http://127.0.0.1:5000/get')
-        .then(response => response.json())
-        .then(json => {
-          createNetwork(json);
-          _('#add-node-btn').classList.remove('hidden');
-        });
+_("#get-graph-btn").addEventListener("click", () => {
+  window
+    .fetch("http://127.0.0.1:5000/get")
+    .then((response) => response.json())
+    .then((json) => {
+      createNetwork(json);
+      _("#add-node-btn").classList.remove("hidden");
+    });
 });
 
-_('#add-node-btn').addEventListener('click', () => {
-  if (!_('#add-node-btn').classList.contains('extended')) {
-    _('#add-node-btn').classList.add('extended');
-    _('.add-node-btn-msg').classList.add('hidden');
-    _('.add-node-form').classList.remove('hidden');
-    _('#add-node-connected-to').appendChild(createNodeOptions());
-    _('.add-node-form').addEventListener('submit', (e) => {
+_("#add-node-btn").addEventListener("click", () => {
+  if (!_("#add-node-btn").classList.contains("extended")) {
+    _("#add-node-btn").classList.add("extended");
+    _(".add-node-btn-msg").classList.add("hidden");
+    _(".add-node-form").classList.remove("hidden");
+    _("#add-node-connected-to").appendChild(createNodeOptions());
+    _(".add-node-form").addEventListener("submit", (e) => {
       e.preventDefault();
       e.stopImmediatePropagation();
 
       addNode(
-        _('#add-node-input-label').value,
-        _('#add-node-direction').value,
-        _('#add-node-connected-to').value,
-        _('#add-node-weight').value
+        _("#add-node-input-label").value,
+        _("#add-node-direction").value,
+        _("#add-node-connected-to").value,
+        _("#add-node-edge-weight").value
       );
     });
   }
 });
 
-_('#edit-node-btn').addEventListener('click', () => {
-  if (!_('#edit-node-btn').classList.contains('extended')) {
-    _('#edit-node-btn').classList.add('extended');
-    _('.edit-node-btn-msg').classList.add('hidden');
-    _('.edit-node-form').classList.remove('hidden');
-    _('.edit-node-form').addEventListener('submit', (e) => {
+_("#edit-node-btn").addEventListener("click", () => {
+  if (!_("#edit-node-btn").classList.contains("extended")) {
+    _("#edit-node-btn").classList.add("extended");
+    _(".edit-node-btn-msg").classList.add("hidden");
+    _(".edit-node-form").classList.remove("hidden");
+    _(".edit-node-form").addEventListener("submit", (e) => {
       e.preventDefault();
       e.stopImmediatePropagation();
 
-      addNode(
-        _('#add-node-input-label').value,
-        _('#add-node-direction').value,
-        _('#add-node-connected-to').value,
-        _('#add-node-weight').value
+      editNode(selectedNode.id, _("#edit-node-input-label").value);
+    });
+  }
+});
+
+_("#add-edge-btn").addEventListener("click", () => {
+  if (!_("#add-edge-btn").classList.contains("extended")) {
+    _("#add-edge-btn").classList.add("extended");
+    _(".add-edge-btn-msg").classList.add("hidden");
+    _(".add-edge-form").classList.remove("hidden");
+    _("#add-edge-from").appendChild(createNodeOptions());
+    _("#add-edge-to").appendChild(createNodeOptions());
+    _("#add-edge-from").value = selectedEdge.fromId;
+    _("#add-edge-to").value = selectedEdge.toId;
+
+    _(".add-edge-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      addEdge(
+        _("#edit-edge-weight").value,
+        _("#edit-edge-from").value,
+        _("#edit-edge-to").value
       );
     });
   }
-})
+});
+
+_("#edit-edge-btn").addEventListener("click", () => {
+  if (!_("#edit-edge-btn").classList.contains("extended")) {
+    _("#edit-edge-btn").classList.add("extended");
+    _(".edit-edge-btn-msg").classList.add("hidden");
+    _(".edit-edge-form").classList.remove("hidden");
+
+    _("#edit-edge-from").appendChild(createNodeOptions());
+    _("#edit-edge-to").appendChild(createNodeOptions());
+    _("#edit-edge-from").value = selectedEdge.fromId;
+    _("#edit-edge-to").value = selectedEdge.toId;
+
+    _(".edit-edge-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      editEdge(
+        selectedEdge.id,
+        _("#edit-edge-weight").value,
+        _("#edit-edge-from").value,
+        _("#edit-edge-to").value
+      );
+    });
+  }
+});
+
+_("#remove-node-btn").addEventListener("click", () => {
+  removeNode(selectedNode.id);
+});
+
+_("#remove-edge-btn").addEventListener("click", () => {
+  removeEdge(selectedEdge.id);
+});
 
 function addNode(label, direction, connectedTo, weight) {
-  console.log(label, direction, connectedTo, weight);
-  window.fetch('http://127.0.0.1:5000/addNode?node=0')
-        .then(response => response.json())
-        .then(json => {
-          createNetwork(json);
-        });
+  window
+    .fetch(
+      url +
+        "/addNode?" +
+        new URLSearchParams({
+          label,
+          direction,
+          connectedTo,
+          edgeValue: weight,
+        })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      createNetwork(json);
+    });
+  deselectedState();
+}
+
+function editNode(nodeId, label) {
+  window
+    .fetch(
+      url +
+        "/updateNode?" +
+        new URLSearchParams({
+          nodeId,
+          nodeLabel: label,
+        })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      createNetwork(json);
+    });
+  deselectedState();
+}
+
+function editEdge(edgeId, edgeWeight, edgeFrom, edgeTo) {
+  window
+    .fetch(
+      url +
+        "/updateEdge?" +
+        new URLSearchParams({
+          edgeId,
+          edgeFrom,
+          edgeTo,
+          edgeValue: edgeWeight,
+        })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      createNetwork(json);
+    });
+  deselectedState();
+}
+
+function addEdge(edgeWeight, edgeFrom, edgeTo) {
+  window
+    .fetch(
+      url +
+        "/add?" +
+        new URLSearchParams({
+          edgeFrom,
+          edgeTo,
+          edgeValue: edgeWeight,
+        })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      createNetwork(json);
+    });
+  deselectedState();
+}
+
+function removeNode(nodeId) {
+  window
+    .fetch(
+      url +
+        "/removeNode?" +
+        new URLSearchParams({
+          node: nodeId,
+        })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      createNetwork(json);
+    });
+  deselectedState();
+}
+
+function removeEdge(edgeId) {
+  window
+    .fetch(
+      url +
+        "/removeEdge?" +
+        new URLSearchParams({
+          edgeId,
+        })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      createNetwork(json);
+    });
+  deselectedState();
+}
+
+function deselectedState() {
   resetAddForm();
+  // resetAddEdgeForm();
+  resetEditForm();
+  // resetEditEdgeForm();
+  hideEditNodeBtn();
+  hideEditEdgeBtn();
+  showAddNodeBtn();
+  hideRemoveEdgeBtn();
+  hideRemoveNodeBtn();
+
+  if (nodes.length > 1) {
+    showAddEdgeBtn();
+  }
 }
 
 function createNodeOptions() {
   const result = document.createDocumentFragment();
 
   for (let node of nodes) {
-    const option = document.createElement('option');
+    const option = document.createElement("option");
     option.value = node.id;
-    option.text  = node.label;
+    option.text = node.label;
     result.appendChild(option);
   }
 
@@ -118,26 +284,89 @@ function createNodeOptions() {
 }
 
 function resetAddForm() {
-  _('#add-node-btn').classList.remove('extended');
-  _('#add-node-btn').classList.remove('hidden');
-  _('.add-node-btn-msg').classList.remove('hidden');
-  _('.add-node-form').classList.add('hidden');
-  _('#add-node-connected-to').innerHTML = '';
+  _("#add-node-btn").classList.remove("extended");
+  _("#add-node-btn").classList.remove("hidden");
+  _(".add-node-btn-msg").classList.remove("hidden");
+  _(".add-node-form").classList.add("hidden");
+  _("#add-node-connected-to").innerHTML = "";
 }
 
 function resetEditForm() {
-  _('#edit-node-btn').classList.remove('extended');
-  _('.edit-node-btn-msg').classList.remove('hidden');
-  _('.edit-node-form').classList.add('hidden');
+  _("#edit-node-btn").classList.remove("extended");
+  _(".edit-node-btn-msg").classList.remove("hidden");
+  _(".edit-node-form").classList.add("hidden");
 }
 
-function selectedNodeListener (params) {
+function selectedNodeListener(params) {
   const selectedNodeId = params.nodes[0];
   const node = network.body.nodes[selectedNodeId];
+  selectedNode = node;
 
-  _('#edit-node-btn').classList.remove('hidden');
-  _('#add-node-btn').classList.add('hidden');
+  showRemoveNodeBtn();
+  showEditNodeBtn();
+  hideAddNodeBtn();
+  hideEditEdgeBtn();
+  hideAddEdgeBtn();
 
-  _('#edit-node-input-label').value = node.options.label;
-  _('#edit-node-weight').value = node.options.value;
+  _("#edit-node-input-label").value = node.options.label;
+}
+
+function selectedEdgeListener(params) {
+  const selectedEdgeId = params.edges[0];
+  const edge = network.body.edges[selectedEdgeId];
+  selectedEdge = edge;
+
+  showRemoveEdgeBtn();
+  hideEditNodeBtn();
+  hideAddNodeBtn();
+  showEditEdgeBtn();
+  hideAddEdgeBtn();
+}
+
+function hideEditNodeBtn() {
+  _("#edit-node-btn").classList.add("hidden");
+}
+
+function showEditNodeBtn() {
+  _("#edit-node-btn").classList.remove("hidden");
+}
+
+function hideAddNodeBtn() {
+  _("#add-node-btn").classList.add("hidden");
+}
+
+function showAddNodeBtn() {
+  _("#add-node-btn").classList.remove("hidden");
+}
+
+function hideEditEdgeBtn() {
+  _("#edit-edge-btn").classList.add("hidden");
+}
+
+function showEditEdgeBtn() {
+  _("#edit-edge-btn").classList.remove("hidden");
+}
+
+function hideAddEdgeBtn() {
+  _("#add-edge-btn").classList.add("hidden");
+}
+
+function showAddEdgeBtn() {
+  _("#add-edge-btn").classList.remove("hidden");
+}
+
+function hideRemoveNodeBtn() {
+  _("#remove-node-btn").classList.add("hidden");
+}
+
+function showRemoveNodeBtn() {
+  _("#remove-node-btn").classList.remove("hidden");
+}
+
+function hideRemoveEdgeBtn() {
+  _("#remove-edge-btn").classList.add("hidden");
+}
+
+function showRemoveEdgeBtn() {
+  _("#remove-edge-btn").classList.remove("hidden");
 }

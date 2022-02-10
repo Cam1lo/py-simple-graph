@@ -1,115 +1,127 @@
 * {
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    padding: 0;
-    margin: 0;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  padding: 0;
+  margin: 0;
 }
 
 form {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    margin-top: 1rem;
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-group {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
 }
 
 input:not(.submit) {
-    margin-top: .5rem;
-    background-color: #111;
-    border: none;
-    border-bottom: 1px solid white;
-    padding: 0 .4rem;
-    color: white;
-    text-align: center;
-    width: 50%;
+  margin-top: 0.5rem;
+  background-color: #111;
+  border: none;
+  border-bottom: 1px solid white;
+  padding: 0 0.4rem;
+  color: white;
+  text-align: center;
+  width: 50%;
 }
 
-input:focus{
-    outline: none;
+input:focus {
+  outline: none;
 }
 
 select {
-    margin-top: 2rem;
-    background-color: #111;
-    padding: .2rem;
-    color: white;
-    border-radius: .2rem;
+  margin-top: 2rem;
+  background-color: #111;
+  padding: 0.2rem;
+  color: white;
+  border-radius: 0.2rem;
 }
 
-html, body {
-    height: 100vh;
+html,
+body {
+  height: 100vh;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .wrapper {
-    display: flex;
-    height: 100%;
+  display: flex;
+  height: 100%;
 }
 
 .wrapper > div {
-    height: 100%;
+  height: 100%;
 }
 
 .controllers {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-    border-right: rgb(44, 44, 44) 1px solid;
-    min-width: 34%;
-    background-color: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  border-right: rgb(44, 44, 44) 1px solid;
+  min-width: 34%;
+  background-color: #111;
 }
 
 .controllers-card {
-    align-items: center;
-    justify-content: space-between;
-    display: flex;
-    flex-direction: column;
-    color: white;
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  color: white;
 }
 
 .controllers-card > h1 {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .btn {
-    padding: .5rem;
-    border: white solid 1px;
-    border-radius: .2rem;
-    width: 90%;
-    text-align: center;
-    transition: .2s;
-    margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: white solid 1px;
+  border-radius: 0.2rem;
+  width: 90%;
+  text-align: center;
+  transition: 0.2s;
+  margin-bottom: 1rem;
 }
 
 .btn:hover {
-    width: 100%;
+  width: 100%;
 }
 
 .btn:not(.extended) {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .graph-container {
-    display: flex;
-    flex-grow: 3;
+  display: flex;
+  flex-grow: 3;
 }
 
 .extended {
-    width: 100%;
-    height: 20rem;
+  width: 100%;
+  height: 20rem;
 }
 
-.node-weight {
-    margin-top: 2rem;
+.extended #edit-node-btn {
+  height: 10rem;
+}
+
+.edge-weight {
+  margin-top: 2rem;
 }
 
 .confirm-btn {
-    margin-top: 5rem;
-    cursor : pointer;
-    background-color: #111;
-    color: white;
-    border: none;
-    font-size: 1.1rem;
+  margin-top: 2rem;
+  cursor: pointer;
+  background-color: #111;
+  color: white;
+  border: none;
+  font-size: 1.1rem;
 }

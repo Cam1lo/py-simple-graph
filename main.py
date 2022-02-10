@@ -6,7 +6,6 @@ app = Flask(__name__)
 nodes = [
     {
         "id": 0,
-        #"value": 0,
         "label": "Main Node"
     }
 ]
