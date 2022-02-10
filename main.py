@@ -10,7 +10,8 @@ nodes = [
     }
 ]
 edges = []
-
+counterNodes=0
+counterEdges=0
 
 @app.route("/")
 def home():
@@ -23,14 +24,24 @@ def get():
         "edges": edges
     })
 
+
+
+
 @app.route("/addNode")
 def addNode():
+    global  counterNodes
+    global counterEdges
+
+    counterNodes+=1
+    counterEdges+=1
+
     nodeLabel = request.args.get('label')
     direction=request.args.get('direction')
     connectedNode=request.args.get('connectedTo')
     edgeValue=request.args.get('edgeValue')
-    newNodeId = len(nodes)
-    newEdgeId = len(edges)
+    newNodeId=counterNodes
+    newEdgeId = counterEdges
+
 
 
     nodes.append(
@@ -70,24 +81,28 @@ def addNode():
 @app.route("/removeNode")
 def removeNode():
     nodeId = request.args.get('node')
-    # TODO: Given a node, remove it.
 
     for i in nodes:
         currentNodeId=i['id']
         if int(currentNodeId)==int(nodeId):
             nodes.remove(i)
+            for j in edges:
+                if int(j['from'])==int(currentNodeId) or int(j['to'])==int(currentNodeId):
+                    edges.remove(j)
+            break
 
     return get()
 
-@app.route("/connectNodes")
-def connectNodes():
+@app.route("/addEdge")
+def addEdge():
+    global counterEdges
+    counterEdges+=1
     nodeId1 = request.args.get('node1')
     nodeId2 = request.args.get('node2')
     #adding weight
     value=request.args.get('value')
-    newEdgeId = len(edges)
+    newEdgeId = counterEdges
 
-    # TODO: Given two nodes, create a edge that connect them.
     edges.append(
         {
             "id": newEdgeId,
@@ -103,7 +118,6 @@ def connectNodes():
 def updateNode():
     nodeId = request.args.get('nodeId')
     nodeLabel = request.args.get('nodeLabel')
-    # TODO: Given a nodeId, update the node with new value and label.
 
     for i in nodes:
         currentNodeId = i['id']
@@ -117,7 +131,7 @@ def updateNode():
 @app.route("/removeEdge")
 def removeEdge():
     edgeId = request.args.get('edgeId')
-    # TODO: Given a edge, remove it.
+
     for i in edges:
         currentEdgeId = i['id']
 
@@ -132,7 +146,6 @@ def updateEdge():
     edgeValue = request.args.get('edgeValue')
     edgeFrom = request.args.get('edgeFrom')
     edgeTo = request.args.get('edgeTo')
-    # TODO: Given a edgeId, update the edge with new value, from and to.
 
 
     for i in edges:
@@ -196,10 +209,42 @@ def searchWide():
 
     })
 
+@app.route("/exportGraph")
+def exportGraph():
+
+        graphName = request.args.get('graphName')
+        location = "static/"+graphName
+
+        file = open(location + ".txt", "w")
+        jsonToExport=get()
+
+        file.write(str(jsonToExport))
+        file.close()
+
+        return location
 
 
+@app.route("/importGraph")
+def importGraph():
+    nodesToImport=[]
+    edgesToImport=[]
+    url=request.args.get('urlFile')
 
+    with open(url) as file:
+        content=file.readline()
+        data=json.loads(content)
 
+    for node in data['nodes']:
+        nodesToImport.append(node)
+    for edge in data['edges']:
+        edgesToImport.append(edge)
+
+    global nodes
+    global edges
+    nodes= nodesToImport
+    edges=edgesToImport
+
+    return get()
 
 
 
