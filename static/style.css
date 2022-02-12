@@ -125,3 +125,24 @@ body {
   border: none;
   font-size: 1.1rem;
 }
+
+.files {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+}
+
+.files > img {
+  margin-left: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+.files > img:hover {
+  background-color: rgb(194, 194, 194);
+}
+
+#upload-input {
+  display: none;
+}

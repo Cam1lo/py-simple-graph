@@ -77,12 +77,25 @@
           </div>
           <div class="btn hidden" id="remove-node-btn">Remove Node</div>
           <div class="btn hidden" id="remove-edge-btn">Remove Edge</div>
+          <div class="btn hidden" id="in-depth">In Depth</div>
+          <div class="btn hidden" id="search-wide">Search Wide</div>
         </div>
       </div>
       <div class="graph-container">
         <div id="my-network"></div>
       </div>
     </div>
+
+    <div class="files">
+      <img
+        id="download"
+        src="{{ url_for('static', filename='download.png') }}"
+      />
+      <img id="upload" src="{{ url_for('static', filename='upload.png') }}" />
+    </div>
+
+    <input type="file" id="upload-input" />
+
     <script src="{{ url_for('static', filename='vis.js') }}"></script>
     <script src="{{ url_for('static', filename='index.js') }}"></script>
   </body>

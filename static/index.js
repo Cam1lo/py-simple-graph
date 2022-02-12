@@ -33,7 +33,9 @@ let selectedEdge;
 
 function createNetworkData(data) {
   nodes = data.nodes;
-  edges = data.edges;
+  edges = data.edges.map((edge) => {
+    return { ...edge, label: edge.value };
+  });
 
   return {
     nodes: new vis.DataSet(nodes),
@@ -43,6 +45,16 @@ function createNetworkData(data) {
 
 function createNetwork(data) {
   network = new vis.Network(container, createNetworkData(data), options);
+  network.setOptions({
+    nodes: {
+      color: {
+        highlight: {
+          border: "#d8392b",
+          background: "#d8392b",
+        },
+      },
+    },
+  });
   network.on("selectNode", selectedNodeListener);
   network.on("deselectNode", deselectedState);
   network.on("selectEdge", selectedEdgeListener);
@@ -56,6 +68,8 @@ _("#get-graph-btn").addEventListener("click", () => {
     .then((json) => {
       createNetwork(json);
       _("#add-node-btn").classList.remove("hidden");
+      _("#get-graph-btn").classList.add("hidden");
+      deselectedState();
     });
 });
 
@@ -100,17 +114,15 @@ _("#add-edge-btn").addEventListener("click", () => {
     _(".add-edge-form").classList.remove("hidden");
     _("#add-edge-from").appendChild(createNodeOptions());
     _("#add-edge-to").appendChild(createNodeOptions());
-    _("#add-edge-from").value = selectedEdge.fromId;
-    _("#add-edge-to").value = selectedEdge.toId;
 
     _(".add-edge-form").addEventListener("submit", (e) => {
       e.preventDefault();
       e.stopImmediatePropagation();
 
       addEdge(
-        _("#edit-edge-weight").value,
-        _("#edit-edge-from").value,
-        _("#edit-edge-to").value
+        _("#add-edge-weight").value,
+        _("#add-edge-from").value,
+        _("#add-edge-to").value
       );
     });
   }
@@ -147,6 +159,61 @@ _("#remove-node-btn").addEventListener("click", () => {
 
 _("#remove-edge-btn").addEventListener("click", () => {
   removeEdge(selectedEdge.id);
+});
+
+_("#download").addEventListener("click", () => {
+  window.fetch(url + "/exportGraph").then((res) => {
+    var link = document.createElement("a");
+    link.setAttribute("download", "my-graph");
+    link.href = url + "/static/my-graph.txt";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  });
+});
+
+_("#upload").addEventListener("click", () => {
+  _("#upload-input").click();
+});
+
+_("#upload-input").addEventListener("change", (e) => {
+  if (e.target.files.length > 0) {
+    let file = e.target.files[0];
+    let formData = new FormData();
+
+    formData.append("file", file);
+    window
+      .fetch("/importGraph", { method: "POST", body: formData })
+      .then((response) => response.json())
+      .then((json) => {
+        createNetwork(json);
+      });
+    deselectedState();
+  }
+});
+
+_("#in-depth").addEventListener("click", () => {
+  window
+    .fetch(
+      url + "/inDepth?" + new URLSearchParams({ sourceNodeId: selectedNode.id })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      animateInDepth(json.inDepthNodes);
+    });
+});
+
+_("#search-wide").addEventListener("click", () => {
+  window
+    .fetch(
+      url +
+        "/searchWide?" +
+        new URLSearchParams({ sourceNodeId: selectedNode.id })
+    )
+    .then((response) => response.json())
+    .then((json) => {
+      animateSearchWide(json.wideNodes);
+    });
 });
 
 function addNode(label, direction, connectedTo, weight) {
@@ -208,7 +275,7 @@ function addEdge(edgeWeight, edgeFrom, edgeTo) {
   window
     .fetch(
       url +
-        "/add?" +
+        "/addEdge?" +
         new URLSearchParams({
           edgeFrom,
           edgeTo,
@@ -254,18 +321,53 @@ function removeEdge(edgeId) {
   deselectedState();
 }
 
+function animateInDepth(array) {
+  var i = 1;
+
+  function myLoop() {
+    setTimeout(function () {
+      network.selectNodes([array[i]], false); //  your code here
+      i++;
+      if (i < array.length) {
+        myLoop();
+      }
+    }, 500);
+  }
+
+  myLoop();
+}
+
+function animateSearchWide(array) {
+  console.log(array);
+  var i = 1;
+
+  function myLoop() {
+    setTimeout(function () {
+      network.selectNodes([array[i]], false); //  your code here
+      i++;
+      if (i < array.length) {
+        myLoop();
+      }
+    }, 500);
+  }
+
+  myLoop();
+}
+
 function deselectedState() {
-  resetAddForm();
-  // resetAddEdgeForm();
-  resetEditForm();
-  // resetEditEdgeForm();
+  resetAddNodeForm();
+  resetAddEdgeForm();
+  resetEditNodeForm();
+  resetEditEdgeForm();
   hideEditNodeBtn();
   hideEditEdgeBtn();
   showAddNodeBtn();
   hideRemoveEdgeBtn();
   hideRemoveNodeBtn();
+  hideInDepth();
+  hideSearchWide();
 
-  if (nodes.length > 1) {
+  if (nodes.length > 0) {
     showAddEdgeBtn();
   }
 }
@@ -283,7 +385,7 @@ function createNodeOptions() {
   return result;
 }
 
-function resetAddForm() {
+function resetAddNodeForm() {
   _("#add-node-btn").classList.remove("extended");
   _("#add-node-btn").classList.remove("hidden");
   _(".add-node-btn-msg").classList.remove("hidden");
@@ -291,10 +393,26 @@ function resetAddForm() {
   _("#add-node-connected-to").innerHTML = "";
 }
 
-function resetEditForm() {
+function resetEditNodeForm() {
   _("#edit-node-btn").classList.remove("extended");
   _(".edit-node-btn-msg").classList.remove("hidden");
   _(".edit-node-form").classList.add("hidden");
+}
+
+function resetEditEdgeForm() {
+  _("#edit-edge-btn").classList.remove("extended");
+  _(".edit-edge-btn-msg").classList.remove("hidden");
+  _(".edit-edge-form").classList.add("hidden");
+  _("#edit-edge-from").innerHTML = "";
+  _("#edit-edge-to").innerHTML = "";
+}
+
+function resetAddEdgeForm() {
+  _("#add-edge-btn").classList.remove("extended");
+  _(".add-edge-btn-msg").classList.remove("hidden");
+  _(".add-edge-form").classList.add("hidden");
+  _("#add-edge-from").innerHTML = "";
+  _("#add-edge-to").innerHTML = "";
 }
 
 function selectedNodeListener(params) {
@@ -304,6 +422,8 @@ function selectedNodeListener(params) {
 
   showRemoveNodeBtn();
   showEditNodeBtn();
+  showInDepth();
+  showSearchWide();
   hideAddNodeBtn();
   hideEditEdgeBtn();
   hideAddEdgeBtn();
@@ -369,4 +489,20 @@ function hideRemoveEdgeBtn() {
 
 function showRemoveEdgeBtn() {
   _("#remove-edge-btn").classList.remove("hidden");
+}
+
+function showInDepth() {
+  _("#in-depth").classList.remove("hidden");
+}
+
+function hideInDepth() {
+  _("#in-depth").classList.add("hidden");
+}
+
+function showSearchWide() {
+  _("#search-wide").classList.remove("hidden");
+}
+
+function hideSearchWide() {
+  _("#search-wide").classList.add("hidden");
 }

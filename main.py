@@ -97,10 +97,10 @@ def removeNode():
 def addEdge():
     global counterEdges
     counterEdges+=1
-    nodeId1 = request.args.get('node1')
-    nodeId2 = request.args.get('node2')
+    nodeId1 = request.args.get('edgeFrom')
+    nodeId2 = request.args.get('edgeTo')
     #adding weight
-    value=request.args.get('value')
+    value=request.args.get('edgeValue')
     newEdgeId = counterEdges
 
     edges.append(
@@ -212,7 +212,7 @@ def searchWide():
 @app.route("/exportGraph")
 def exportGraph():
 
-        graphName = request.args.get('graphName')
+        graphName = 'my-graph'
         location = "static/"+graphName
 
         file = open(location + ".txt", "w")
@@ -224,16 +224,14 @@ def exportGraph():
         return location
 
 
-@app.route("/importGraph")
+@app.route("/importGraph", methods = ['POST'])
 def importGraph():
+    file = request.files['file']
     nodesToImport=[]
     edgesToImport=[]
-    url=request.args.get('urlFile')
 
-    with open(url) as file:
-        content=file.readline()
-        data=json.loads(content)
-
+    content=file.readline()
+    data=json.loads(content)
     for node in data['nodes']:
         nodesToImport.append(node)
     for edge in data['edges']:
